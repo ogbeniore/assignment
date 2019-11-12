@@ -1,11 +1,33 @@
 <template>
   <div id="app">
-    <h1>Best Movies</h1>
+    <h1>{{title}}</h1>
     <div class="search_form">
       <form @submit.prevent="search">
         <input type="text" name="search" v-model="searchItem" class="form_item">
         <button class="form_button" type="submit">
           Search
+        </button>
+      </form>
+    </div>
+    <div class="movie_form">
+      <form @submit.prevent="addMovie">
+        <div>
+          <label for="name">Name</label>
+          <input type="text" name="name" v-model="Name">
+        </div>
+        <div>
+          <label for="type">Type</label>
+          <select name="type" v-model="Type">
+            <option value="music">Music</option>
+            <option value="movie">Movie</option>
+          </select>
+        </div>
+        <div>
+          <label for="">Url</label>
+          <input type="url" name="url" v-model="Url">
+        </div>
+        <button class="form_button" type="submit">
+          Add movie
         </button>
       </form>
     </div>
@@ -36,7 +58,6 @@
 
 <script>
 import MovieCard from '@/components/ImageCard.vue'
-import { setTimeout } from 'timers';
 export default {
   name: "app",
   components: {
@@ -44,131 +65,14 @@ export default {
   },
   data() {
     return {
-      movieList: [
-        {
-          Name: "John Frusciante",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Reservoir Dogs",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Foo Fighters",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Pearl Jam",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Sublime",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Inglourious Basterds",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Incubus",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Audioslave",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Jackie Brown",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Nirvana",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "The Big Lebowski",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Goodfellas",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Guns N' Roses",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Death Proof",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "The Offspring",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Django Unchained",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Rage Against The Machine",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Snatch",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Trainspotting",
-          Type: "movie",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        },
-        {
-          Name: "Weezer",
-          Type: "music",
-          Url:
-            "http://static.tvmaze.com/uploads/images/original_untouched/60/151357.jpg"
-        }
-      ],
+      movieList: [],
       searchItem: '',
       searchResults: [],
-      isLoading: true
+      isLoading: true,
+      title: 'My movies',
+      Name: '',
+      Type: '',
+      Url: ''
     };
   },
   methods: {
@@ -181,16 +85,39 @@ export default {
       this.searchResults = filteredArray
     },
     deleteMovie(name) {
+      this.title = "new title"
       this.movieList = this.movieList.filter(function (movie) {
         return movie.Name !== name
       })
       this.searchResults = this.searchResults.filter(function (movie) {
         return movie.Name !== name
       })
+    },
+    addMovie() {
+      const Data = {
+        Name: this.Name,
+        Type: this.Type,
+        Url: this.Url
+      }
+      this.$http.post('http://localhost:3000/movies', Data)
+        .then(response => {
+          this.movieList.push(response.data)
+          this.Name = ''
+          this.Type = '',
+          this.Url = ''
+        })
+        .catch(error => console.log(error.response))
     }
   },
   mounted() {
-    setTimeout(() => {this.isLoading = false}, 5000)
+    this.$http.get('http://localhost:3000/movies')
+      .then(response => {
+        this.isLoading = false;
+        this.movieList = response.data
+      })
+      .catch(error => {
+        console.log(error.response)
+      })
   },
 };
 </script>
@@ -215,7 +142,9 @@ form {
   margin: 0 auto;
   max-width: 700px;
 }
-.form_item {
+.form_item,
+input,
+select {
   padding: 1rem;
   font-size: 18px;
   border: 1px solid blueviolet;
@@ -243,5 +172,11 @@ form {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 30px;
+}
+.movie_form form {
+display: block;
+}
+form > div {
+  margin: 1rem;
 }
 </style>
